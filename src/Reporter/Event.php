@@ -58,6 +58,6 @@ class Event implements \JsonSerializable
             "system" => $this->system,
             "status" => $this->status,
             "message" => $this->message,
-            "tool" => $this->tool);
+            "type" => $this->tool);
     }
 }

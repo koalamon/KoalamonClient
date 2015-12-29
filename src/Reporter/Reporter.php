@@ -2,6 +2,11 @@
 
 namespace Koalamon\Client\Reporter;
 
+use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\ServerException;
+use GuzzleHttp\Psr7\Request;
+
 /**
  * Class Reporter
  *
@@ -32,7 +37,7 @@ class Reporter
      *                 which can be seen if you are the project owner.
      * @param null $httpClient
      */
-    public function __construct($project, $apiKey, HttpAdapterInterface $httpClient = null)
+    public function __construct($project, $apiKey, Client $httpClient = null)
     {
         $this->project = $project;
         $this->apiKey = $apiKey;
@@ -50,7 +55,7 @@ class Reporter
      * @param Event $event
      * @param bool|false $debug
      */
-    public function send(Event $event, bool $debug = false)
+    public function send(Event $event, $debug = false)
     {
         if ($debug) {
             $endpoint = self::ENDPOINT_WEBHOOK_DEFAULT_DEBUG;
@@ -59,7 +64,7 @@ class Reporter
         }
 
         $endpointWithApiKey = $endpoint . "?api_key=" . $this->apiKey;
-        $response = $this->getJsonResponse($endpoint, $event);
+        $response = $this->getJsonResponse($endpointWithApiKey, $event);
 
         if ($response->status != self::RESPONSE_STATUS_SUCCESS) {
             throw new ServerException("Failed sending event (" . $response->message . ").", $response);
@@ -84,8 +89,13 @@ class Reporter
     {
         $eventJson = json_encode($event);
 
-        $request = new Request("POST", $endpoint, $eventJson);
-        $response = $this->httpClient->sendRequest($request);
+        try {
+            $response = $this->httpClient->request('POST', $endpoint, ['body' => $eventJson]);
+        } catch (\Exception $e) {
+            var_dump($e->getMessage());
+            die;
+            throw $e;
+        }
 
         $responseStatus = json_decode($response->getBody());
 
