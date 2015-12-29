@@ -1,6 +1,6 @@
 <?php
 
-namespace Koalamon\EventReporter;
+namespace Koalamon\Client\Reporter;
 
 /**
  * Class Reporter
