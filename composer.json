@@ -1,0 +1,13 @@
+{
+  "name": "koalamon/koalamonclient",
+  "description": "This library can be used to send events to the koalamon webhook",
+  "require": {
+    "php": ">= 5.4.0",
+    "guzzlehttp/guzzle": "~6.0.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Koalamon\\EventReporter\\": "src/"
+    }
+  }
+}
