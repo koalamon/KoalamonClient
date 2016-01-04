@@ -21,6 +21,7 @@ class Event implements \JsonSerializable
     private $identifier;
     private $status;
     private $tool;
+    private $value;
 
     /**
      * Initialize the event.
@@ -32,12 +33,13 @@ class Event implements \JsonSerializable
      * @param string $message The message that will be display in koalamon. Only mandatory if the
      *                        status is failure.
      */
-    public function __construct($identifier, $system, $status, $tool = "", $message = "")
+    public function __construct($identifier, $system, $status, $tool = "", $message = "", $value = "")
     {
         $this->message = $message;
         $this->system = $system;
         $this->identifier = $identifier;
         $this->tool = $tool;
+        $this->value = $value;
 
         if ($status == self::STATUS_FAILURE || $status == self::STATUS_SUCCESS) {
             $this->status = $status;
@@ -58,6 +60,7 @@ class Event implements \JsonSerializable
             "system" => $this->system,
             "status" => $this->status,
             "message" => $this->message,
-            "type" => $this->tool);
+            "type" => $this->tool,
+            "value" => $this->value);
     }
 }

@@ -92,8 +92,6 @@ class Reporter
         try {
             $response = $this->httpClient->request('POST', $endpoint, ['body' => $eventJson]);
         } catch (\Exception $e) {
-            var_dump($e->getMessage());
-            die;
             throw $e;
         }
 
