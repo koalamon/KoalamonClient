@@ -5,6 +5,7 @@ namespace Koalamon\Client;
 use GuzzleHttp\Psr7\Uri;
 use Koalamon\Client\Entity\Project;
 use Koalamon\Client\Entity\System;
+use Koalamon\Client\Entity\User;
 
 class Client
 {
@@ -15,13 +16,9 @@ class Client
     const REST_USER_GET_PROJECTS = 'http://www.koalamon.com/rest/user/projects/';
     const REST_PROJECT_GET_SYSTEMS = 'http://www.koalamon.com/rest/{project}/systems/';
 
-    public function __construct($username, $userApiKey, $httpClient)
+    public function __construct($httpClient)
     {
-        $this->username = $username;
-        $this->userApiKey = $userApiKey;
-
         $this->client = $httpClient;
-        // check credentials
     }
 
     private function getUrl($url, array $parameters = array())
@@ -37,16 +34,21 @@ class Client
 
     private function getResult($url)
     {
-        $response = $this->client->get(new Uri($url));
+        try {
+            $response = $this->client->get(new Uri($url));
+        }catch (\Exception $e) {
+            throw new \RuntimeException("Error fetching " . $url . ': '. $e->getMessage());
+        }
+
         return json_decode((string)$response->getBody());
     }
 
     /**
      * @return Project[]
      */
-    public function getProjects()
+    public function getProjects(User $user)
     {
-        $url = self::REST_USER_GET_PROJECTS . '?username=' . $this->username . '&api_key=' . $this->userApiKey;
+        $url = self::REST_USER_GET_PROJECTS . '?username=' . $user->getName() . '&api_key=' .$user->getApiKey();
 
         $projectArray = $this->getResult($url);
 
