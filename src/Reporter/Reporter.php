@@ -3,9 +3,7 @@
 namespace Koalamon\Client\Reporter;
 
 use GuzzleHttp\Client;
-use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\ServerException;
-use GuzzleHttp\Psr7\Request;
 
 /**
  * Class Reporter
@@ -21,12 +19,16 @@ class Reporter
     private $project;
 
     /**
-     * @var HttpAdapterInterface|null
+     * @var HttpAdapterInterface
      */
     private $httpClient;
 
     const ENDPOINT_WEBHOOK_DEFAULT = "http://www.koalamon.com/webhook/";
     const ENDPOINT_WEBHOOK_DEFAULT_DEBUG = "http://www.koalamon.com/app_dev.php/webhook/";
+
+    const ENDPOINT_INFORMATION_DEFAULT = "http://www.koalamon.com/api/information/";
+    const ENDPOINT_INFORMATION_DEFAULT_DEBUG = "http://www.koalamon.com/app_dev.php/api/information/";
+
 
     const RESPONSE_STATUS_SUCCESS = "success";
     const RESPONSE_STATUS_FAILURE = "failure";
@@ -57,6 +59,11 @@ class Reporter
      */
     public function send(Event $event, $debug = false)
     {
+        $this->send($event, $debug);
+    }
+
+    public function sendEvent(Event $event, $debug = false)
+    {
         if ($debug) {
             $endpoint = self::ENDPOINT_WEBHOOK_DEFAULT_DEBUG;
         } else {
@@ -65,6 +72,22 @@ class Reporter
 
         $endpointWithApiKey = $endpoint . "?api_key=" . $this->apiKey;
         $response = $this->getJsonResponse($endpointWithApiKey, $event);
+
+        if ($response->status != self::RESPONSE_STATUS_SUCCESS) {
+            throw new ServerException("Failed sending event (" . $response->message . ").", $response);
+        }
+    }
+
+    public function sendInformation(Information $information, $debug)
+    {
+        if ($debug) {
+            $endpoint = self::ENDPOINT_INFORMATION_DEFAULT_DEBUG;
+        } else {
+            $endpoint = self::ENDPOINT_INFORMATION_DEFAULT;
+        }
+
+        $endpointWithApiKey = $endpoint . "?api_key=" . $this->apiKey;
+        $response = $this->getJsonResponse($endpointWithApiKey, $information);
 
         if ($response->status != self::RESPONSE_STATUS_SUCCESS) {
             throw new ServerException("Failed sending event (" . $response->message . ").", $response);
@@ -85,12 +108,12 @@ class Reporter
      *   status: "success"
      * }
      */
-    private function getJsonResponse($endpoint, Event $event)
+    private function getJsonResponse($endpoint, \JsonSerializable $object)
     {
-        $eventJson = json_encode($event);
+        $objectJson = json_encode($object);
 
         try {
-            $response = $this->httpClient->request('POST', $endpoint, ['body' => $eventJson]);
+            $response = $this->httpClient->request('POST', $endpoint, ['body' => $objectJson]);
         } catch (\Exception $e) {
             throw $e;
         }

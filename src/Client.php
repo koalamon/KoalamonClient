@@ -9,8 +9,6 @@ use Koalamon\Client\Entity\User;
 
 class Client
 {
-    private $username;
-    private $userApiKey;
     private $client;
 
     const REST_USER_GET_PROJECTS = 'http://www.koalamon.com/rest/user/projects/';
@@ -36,8 +34,8 @@ class Client
     {
         try {
             $response = $this->client->get(new Uri($url));
-        }catch (\Exception $e) {
-            throw new \RuntimeException("Error fetching " . $url . ': '. $e->getMessage());
+        } catch (\Exception $e) {
+            throw new \RuntimeException("Error fetching " . $url . ': ' . $e->getMessage());
         }
 
         return json_decode((string)$response->getBody());
@@ -48,7 +46,7 @@ class Client
      */
     public function getProjects(User $user)
     {
-        $url = self::REST_USER_GET_PROJECTS . '?username=' . $user->getName() . '&api_key=' .$user->getApiKey();
+        $url = self::REST_USER_GET_PROJECTS . '?username=' . $user->getName() . '&api_key=' . $user->getApiKey();
 
         $projectArray = $this->getResult($url);
 
