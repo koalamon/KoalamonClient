@@ -11,11 +11,16 @@ class Client
 {
     private $client;
 
-    const REST_USER_GET_PROJECTS = 'http://www.koalamon.com/rest/user/projects/';
-    const REST_PROJECT_GET_SYSTEMS = 'http://www.koalamon.com/rest/{project}/systems/';
+    private $koalamonServer = 'http://www.koalamon.com';
 
-    public function __construct($httpClient)
+    const REST_USER_GET_PROJECTS = '/rest/user/projects/';
+    const REST_PROJECT_GET_SYSTEMS = '/rest/{project}/systems/';
+
+    public function __construct($httpClient, $koalamonServer = null)
     {
+        if ($koalamonServer) {
+            $this->koalamonServer = $koalamonServer;
+        }
         $this->client = $httpClient;
     }
 
@@ -33,9 +38,15 @@ class Client
     private function getResult($url)
     {
         try {
-            $response = $this->client->get(new Uri($url));
-        } catch (\Exception $e) {
-            throw new \RuntimeException("Error fetching " . $url . ': ' . $e->getMessage());
+            $uri = new Uri($this->koalamonServer . $url);
+            $response = $this->client->get($uri);
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
+            if ($e->getResponse()->getStatusCode() == 403) {
+                $message = "You are not allowed to call this action. Please check your API key.";
+            } else {
+                $message = "Error fetching " . (string)$uri . ': ' . $e->getMessage();
+            }
+            throw new \RuntimeException($message);
         }
 
         return json_decode((string)$response->getBody());
@@ -68,10 +79,19 @@ class Client
         $url = $this->getUrl(self::REST_PROJECT_GET_SYSTEMS . '?api_key=' . $project->getApiKey(), array('project' => $project->getIdentifier()));
 
         $systemsArray = $this->getResult($url);
+
         $systems = array();
 
         foreach ($systemsArray as $systemsElement) {
-            $systems[] = new System($systemsElement->identifier, $systemsElement->name, $systemsElement->url, $systemsElement->project);
+            $subSystems = array();
+
+            if (property_exists($systemsElement, 'subSystems')) {
+                foreach ($systemsElement->subSystems as $subSystem) {
+                    $subSystems[] = new System($subSystem->identifier, $subSystem->name, $subSystem->url, $subSystem->project);
+                }
+            }
+            
+            $systems[] = new System($systemsElement->identifier, $systemsElement->name, $systemsElement->url, $systemsElement->project, $subSystems);
         }
 
         return $systems;

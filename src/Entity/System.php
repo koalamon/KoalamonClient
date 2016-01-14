@@ -10,6 +10,8 @@ class System
     private $url;
     private $project;
 
+    private $subSystems;
+
     /**
      * System constructor.
      * @param $identifier
@@ -17,12 +19,13 @@ class System
      * @param $url
      * @param $project
      */
-    public function __construct($identifier, $name, $url, $project)
+    public function __construct($identifier, $name, $url, $project, $subSystems = array())
     {
         $this->identifier = $identifier;
         $this->name = $name;
         $this->url = $url;
         $this->project = $project;
+        $this->subSystems = $subSystems;
     }
 
     /**
@@ -57,5 +60,11 @@ class System
         return $this->project;
     }
 
-
+    /**
+     * @return mixed
+     */
+    public function getSubSystems()
+    {
+        return $this->subSystems;
+    }
 }
