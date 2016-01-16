@@ -19,7 +19,7 @@ class System
      * @param $url
      * @param $project
      */
-    public function __construct($identifier, $name, $url, $project, $subSystems = array())
+    public function __construct($identifier, $name, $url, Project $project, $subSystems = array())
     {
         $this->identifier = $identifier;
         $this->name = $name;
@@ -53,7 +53,7 @@ class System
     }
 
     /**
-     * @return mixed
+     * @return Project
      */
     public function getProject()
     {

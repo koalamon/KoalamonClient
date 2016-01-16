@@ -35,10 +35,15 @@ class Client
         return $finalUrl;
     }
 
-    private function getResult($url)
+    private function getResult($url, $addServer = true)
     {
         try {
-            $uri = new Uri($this->koalamonServer . $url);
+            if ($addServer) {
+                $uri = new Uri($this->koalamonServer . $url);
+            } else {
+                $uri = new Uri($url);
+            }
+
             $response = $this->client->get($uri);
         } catch (\GuzzleHttp\Exception\ClientException $e) {
             if ($e->getResponse()->getStatusCode() == 403) {
@@ -71,15 +76,26 @@ class Client
     }
 
     /**
+     * @param $url
+     * @return System[]
+     */
+    public function getSystemsFromUrl($url)
+    {
+        return $this->initSystems($this->getResult($url, false));
+    }
+
+    /**
      * @param Project $project
      * @return System[]
      */
     public function getSystems(Project $project)
     {
         $url = $this->getUrl(self::REST_PROJECT_GET_SYSTEMS . '?api_key=' . $project->getApiKey(), array('project' => $project->getIdentifier()));
+        return $this->initSystems($this->getResult($url));
+    }
 
-        $systemsArray = $this->getResult($url);
-
+    private function initSystems(array $systemsArray)
+    {
         $systems = array();
 
         foreach ($systemsArray as $systemsElement) {
@@ -87,11 +103,13 @@ class Client
 
             if (property_exists($systemsElement, 'subSystems')) {
                 foreach ($systemsElement->subSystems as $subSystem) {
-                    $subSystems[] = new System($subSystem->identifier, $subSystem->name, $subSystem->url, $subSystem->project);
+                    $project = new Project($subSystem->project->name, $systemsElement->project->identifier, $subSystem->project->api_key);
+                    $subSystems[] = new System($subSystem->identifier, $subSystem->name, $subSystem->url, $project);
                 }
             }
-            
-            $systems[] = new System($systemsElement->identifier, $systemsElement->name, $systemsElement->url, $systemsElement->project, $subSystems);
+
+            $sysProject = new Project($systemsElement->project->name, $systemsElement->project->identifier, $systemsElement->project->api_key);
+            $systems[] = new System($systemsElement->identifier, $systemsElement->name, $systemsElement->url, $sysProject, $subSystems);
         }
 
         return $systems;
