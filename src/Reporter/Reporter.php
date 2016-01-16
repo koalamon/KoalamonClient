@@ -23,12 +23,13 @@ class Reporter
      */
     private $httpClient;
 
-    const ENDPOINT_WEBHOOK_DEFAULT = "http://www.koalamon.com/webhook/";
-    const ENDPOINT_WEBHOOK_DEFAULT_DEBUG = "http://www.koalamon.com/app_dev.php/webhook/";
+    private $koalamonServer = 'http://www.koalamon.com';
 
-    const ENDPOINT_INFORMATION_DEFAULT = "http://www.koalamon.com/api/information/";
-    const ENDPOINT_INFORMATION_DEFAULT_DEBUG = "http://www.koalamon.com/app_dev.php/api/information/";
+    const ENDPOINT_WEBHOOK_DEFAULT = "/webhook/";
+    const ENDPOINT_WEBHOOK_DEFAULT_DEBUG = "/app_dev.php/webhook/";
 
+    const ENDPOINT_INFORMATION_DEFAULT = "/api/information/";
+    const ENDPOINT_INFORMATION_DEFAULT_DEBUG = "/app_dev.php/api/information/";
 
     const RESPONSE_STATUS_SUCCESS = "success";
     const RESPONSE_STATUS_FAILURE = "failure";
@@ -39,7 +40,7 @@ class Reporter
      *                 which can be seen if you are the project owner.
      * @param null $httpClient
      */
-    public function __construct($project, $apiKey, Client $httpClient = null)
+    public function __construct($project, $apiKey, Client $httpClient = null, $koalamonServer = null)
     {
         $this->project = $project;
         $this->apiKey = $apiKey;
@@ -48,6 +49,10 @@ class Reporter
             $this->httpClient = new Client();
         } else {
             $this->httpClient = $httpClient;
+        }
+
+        if (!is_null($koalamonServer)) {
+            $this->koalamonServer = $koalamonServer;
         }
     }
 
@@ -74,7 +79,7 @@ class Reporter
         $response = $this->getJsonResponse($endpointWithApiKey, $event);
 
         if ($response->status != self::RESPONSE_STATUS_SUCCESS) {
-            throw new ServerException("Failed sending event (" . $response->message . ").", $response);
+            throw new \RuntimeException("Failed sending event with message '" . $response->message . "'");
         }
     }
 
@@ -113,7 +118,7 @@ class Reporter
         $objectJson = json_encode($object);
 
         try {
-            $response = $this->httpClient->request('POST', $endpoint, ['body' => $objectJson]);
+            $response = $this->httpClient->request('POST', $this->koalamonServer . $endpoint, ['body' => $objectJson]);
         } catch (\Exception $e) {
             throw $e;
         }
