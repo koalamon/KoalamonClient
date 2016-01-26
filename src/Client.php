@@ -43,7 +43,6 @@ class Client
             } else {
                 $uri = new Uri($url);
             }
-
             $response = $this->client->get($uri);
         } catch (\GuzzleHttp\Exception\ClientException $e) {
             if ($e->getResponse()->getStatusCode() == 403) {
@@ -79,9 +78,9 @@ class Client
      * @param $url
      * @return System[]
      */
-    public function getSystemsFromUrl($url)
+    public function getSystemsFromUrl($url, $withOptions = false)
     {
-        return $this->initSystems($this->getResult($url, false));
+        return $this->initSystems($this->getResult($url, false), $withOptions);
     }
 
     /**
@@ -94,22 +93,31 @@ class Client
         return $this->initSystems($this->getResult($url));
     }
 
-    private function initSystems(array $systemsArray)
+    private function initSystems(array $systemsArray, $withOptions = false)
     {
         $systems = array();
 
         foreach ($systemsArray as $systemsElement) {
+
+            if ($withOptions) {
+                $element = $systemsElement->system;
+                $options = $systemsElement->options;
+            } else {
+                $element = $systemsElement;
+                $options = '';
+            }
+
             $subSystems = array();
 
-            if (property_exists($systemsElement, 'subSystems')) {
-                foreach ($systemsElement->subSystems as $subSystem) {
-                    $project = new Project($subSystem->project->name, $systemsElement->project->identifier, $subSystem->project->api_key);
+            if (property_exists($element, 'subSystems')) {
+                foreach ($element->subSystems as $subSystem) {
+                    $project = new Project($subSystem->project->name, $element->project->identifier, $subSystem->project->api_key);
                     $subSystems[] = new System($subSystem->identifier, $subSystem->name, $subSystem->url, $project);
                 }
             }
 
-            $sysProject = new Project($systemsElement->project->name, $systemsElement->project->identifier, $systemsElement->project->api_key);
-            $systems[] = new System($systemsElement->identifier, $systemsElement->name, $systemsElement->url, $sysProject, $subSystems);
+            $sysProject = new Project($element->project->name, $element->project->identifier, $element->project->api_key);
+            $systems[] = ['system' => new System($element->identifier, $element->name, $element->url, $sysProject, $subSystems), 'options' => $options];
         }
 
         return $systems;
