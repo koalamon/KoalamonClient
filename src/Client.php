@@ -101,7 +101,12 @@ class Client
 
             if ($withOptions) {
                 $element = $systemsElement->system;
-                $options = $systemsElement->options;
+                if(property_exists($systemsElement, 'options')) {
+                    $options = $systemsElement->options;
+                }else{
+                    $options = "";
+                }
+
             } else {
                 $element = $systemsElement;
                 $options = '';
