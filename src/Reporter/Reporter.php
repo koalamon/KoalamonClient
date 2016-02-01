@@ -64,7 +64,7 @@ class Reporter
      */
     public function send(Event $event, $debug = false)
     {
-        $this->send($event, $debug);
+        $this->sendEvent($event, $debug);
     }
 
     public function sendEvent(Event $event, $debug = false)
