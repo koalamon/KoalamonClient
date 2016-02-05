@@ -83,6 +83,11 @@ class Client
         return $this->initSystems($this->getResult($url, false), $withOptions);
     }
 
+    public function getUrlsFromUrl($url)
+    {
+        return $this->getResult($url, false);
+    }
+
     /**
      * @param Project $project
      * @return System[]
@@ -101,9 +106,9 @@ class Client
 
             if ($withOptions) {
                 $element = $systemsElement->system;
-                if(property_exists($systemsElement, 'options')) {
+                if (property_exists($systemsElement, 'options')) {
                     $options = $systemsElement->options;
-                }else{
+                } else {
                     $options = "";
                 }
 
