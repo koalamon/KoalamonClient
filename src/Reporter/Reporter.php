@@ -120,7 +120,9 @@ class Reporter
         try {
             $response = $this->httpClient->request('POST', $this->koalamonServer . $endpoint, ['body' => $objectJson]);
         } catch (\Exception $e) {
-            throw $e;
+            $ex = new \Koalamon\Client\Reporter\ServerException($e->getMessage(), $e->getResponse());
+            $ex->setEndpoint($this->koalamonServer . $endpoint);
+            throw $ex;
         }
 
         $responseStatus = json_decode($response->getBody());
