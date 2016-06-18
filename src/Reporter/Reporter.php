@@ -23,7 +23,7 @@ class Reporter
      */
     private $httpClient;
 
-    private $koalamonServer = 'http://www.koalamon.com';
+    private $koalamonServer = 'https://www.koalamon.com';
 
     const ENDPOINT_WEBHOOK_DEFAULT = "/webhook/";
     const ENDPOINT_WEBHOOK_DEFAULT_DEBUG = "/app_dev.php/webhook/";
