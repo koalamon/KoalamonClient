@@ -78,6 +78,10 @@ class Reporter
             var_dump($response);
         }
 
+        if(is_null($response)) {
+            throw new \RuntimeException("Failed sending event to ".$this->koalamonWebhookServer . $endpointWithApiKey);
+        }
+
         if ($response->status != self::RESPONSE_STATUS_SUCCESS) {
             throw new \RuntimeException("Failed sending event with message '" . $response->message . "'");
         }
