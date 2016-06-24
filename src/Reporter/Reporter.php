@@ -23,12 +23,11 @@ class Reporter
      */
     private $httpClient;
 
-    const ENDPOINT_WEBHOOK_DEFAULT = "http://www.koalamon.com/webhook/";
-    const ENDPOINT_WEBHOOK_DEFAULT_DEBUG = "http://www.koalamon.com/app_dev.php/webhook/";
+    const ENDPOINT_WEBHOOK_DEFAULT = "https://webhook.koalamon.com/";
+    const ENDPOINT_WEBHOOK_DEFAULT_DEBUG = "https://webhook.koalamon.com/";
 
     const ENDPOINT_INFORMATION_DEFAULT = "http://www.koalamon.com/api/information/";
     const ENDPOINT_INFORMATION_DEFAULT_DEBUG = "http://www.koalamon.com/app_dev.php/api/information/";
-
 
     const RESPONSE_STATUS_SUCCESS = "success";
     const RESPONSE_STATUS_FAILURE = "failure";
