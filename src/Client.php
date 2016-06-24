@@ -11,11 +11,16 @@ class Client
 {
     private $client;
 
-    const REST_USER_GET_PROJECTS = 'http://www.koalamon.com/rest/user/projects/';
-    const REST_PROJECT_GET_SYSTEMS = 'http://www.koalamon.com/rest/{project}/systems/';
+    private $koalamonServer = 'https://monitor.koalamon.com';
 
-    public function __construct($httpClient)
+    const REST_USER_GET_PROJECTS = '/rest/user/projects/';
+    const REST_PROJECT_GET_SYSTEMS = '/rest/{project}/systems/';
+
+    public function __construct($httpClient, $koalamonServer = null)
     {
+        if ($koalamonServer) {
+            $this->koalamonServer = $koalamonServer;
+        }
         $this->client = $httpClient;
     }
 
@@ -30,12 +35,22 @@ class Client
         return $finalUrl;
     }
 
-    private function getResult($url)
+    private function getResult($url, $addServer = true)
     {
         try {
-            $response = $this->client->get(new Uri($url));
-        } catch (\Exception $e) {
-            throw new \RuntimeException("Error fetching " . $url . ': ' . $e->getMessage());
+            if ($addServer) {
+                $uri = new Uri($this->koalamonServer . $url);
+            } else {
+                $uri = new Uri($url);
+            }
+            $response = $this->client->get($uri);
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
+            if ($e->getResponse()->getStatusCode() == 403) {
+                $message = "You are not allowed to call this action. Please check your API key.";
+            } else {
+                $message = "Error fetching " . (string)$uri . ': ' . $e->getMessage();
+            }
+            throw new \RuntimeException($message);
         }
 
         return json_decode((string)$response->getBody());
@@ -60,18 +75,59 @@ class Client
     }
 
     /**
+     * @param $url
+     * @return System[]
+     */
+    public function getSystemsFromUrl($url, $withOptions = false)
+    {
+        return $this->initSystems($this->getResult($url, false), $withOptions);
+    }
+
+    public function getUrlsFromUrl($url)
+    {
+        return $this->getResult($url, false);
+    }
+
+    /**
      * @param Project $project
      * @return System[]
      */
     public function getSystems(Project $project)
     {
         $url = $this->getUrl(self::REST_PROJECT_GET_SYSTEMS . '?api_key=' . $project->getApiKey(), array('project' => $project->getIdentifier()));
+        return $this->initSystems($this->getResult($url));
+    }
 
-        $systemsArray = $this->getResult($url);
+    private function initSystems(array $systemsArray, $withOptions = false)
+    {
         $systems = array();
 
         foreach ($systemsArray as $systemsElement) {
-            $systems[] = new System($systemsElement->identifier, $systemsElement->name, $systemsElement->url, $systemsElement->project);
+
+            if ($withOptions) {
+                $element = $systemsElement->system;
+                if (property_exists($systemsElement, 'options')) {
+                    $options = $systemsElement->options;
+                } else {
+                    $options = "";
+                }
+
+            } else {
+                $element = $systemsElement;
+                $options = '';
+            }
+
+            $subSystems = array();
+
+            if (property_exists($element, 'subSystems')) {
+                foreach ($element->subSystems as $subSystem) {
+                    $project = new Project($subSystem->project->name, $element->project->identifier, $subSystem->project->api_key);
+                    $subSystems[] = new System($subSystem->identifier, $subSystem->name, $subSystem->url, $project);
+                }
+            }
+
+            $sysProject = new Project($element->project->name, $element->project->identifier, $element->project->api_key);
+            $systems[] = ['system' => new System($element->identifier, $element->name, $element->url, $sysProject, $subSystems), 'options' => $options];
         }
 
         return $systems;

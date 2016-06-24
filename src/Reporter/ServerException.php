@@ -1,6 +1,7 @@
 <?php
 
 namespace Koalamon\Client\Reporter;
+use GuzzleHttp\Psr7\Response;
 
 /**
  * Class ServerException
@@ -15,6 +16,8 @@ class ServerException extends \RuntimeException
      * @var Response
      */
     private $response;
+
+    private $endpoint;
 
     function __construct($message, Response $response)
     {
@@ -31,5 +34,15 @@ class ServerException extends \RuntimeException
     public function getResponse()
     {
         return $this->response;
+    }
+
+    public function setEndpoint($endpoint)
+    {
+        $this->endpoint = $endpoint;
+    }
+
+    public function getEndpoint()
+    {
+        return $this->endpoint;
     }
 }

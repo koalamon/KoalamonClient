@@ -23,22 +23,22 @@ class Reporter
      */
     private $httpClient;
 
-    const ENDPOINT_WEBHOOK_DEFAULT = "https://webhook.koalamon.com/";
-    const ENDPOINT_WEBHOOK_DEFAULT_DEBUG = "https://webhook.koalamon.com/";
+    private $koalamonWebhookServer = 'https://webhook.koalamon.com/';
+    private $koalamonInformationServer = 'https://monitor.koalamon.com/';
 
-    const ENDPOINT_INFORMATION_DEFAULT = "http://www.koalamon.com/api/information/";
-    const ENDPOINT_INFORMATION_DEFAULT_DEBUG = "http://www.koalamon.com/app_dev.php/api/information/";
+    const ENDPOINT_INFORMATION_DEFAULT = "/api/information/";
+    const ENDPOINT_INFORMATION_DEFAULT_DEBUG = "/app_dev.php/api/information/";
 
     const RESPONSE_STATUS_SUCCESS = "success";
     const RESPONSE_STATUS_FAILURE = "failure";
 
     /**
-     * @param $project The project name you want to report the event for.
-     * @param $apiKey  The api key can be found on the admin page of a project,
+     * @param $project string The project name you want to report the event for.
+     * @param $apiKey  string The api key can be found on the admin page of a project,
      *                 which can be seen if you are the project owner.
      * @param null $httpClient
      */
-    public function __construct($project, $apiKey, Client $httpClient = null)
+    public function __construct($project, $apiKey, Client $httpClient = null, $koalamonWebhookServer = null, $koalamonInformationServer = null)
     {
         $this->project = $project;
         $this->apiKey = $apiKey;
@@ -47,6 +47,14 @@ class Reporter
             $this->httpClient = new Client();
         } else {
             $this->httpClient = $httpClient;
+        }
+
+        if (!is_null($koalamonWebhookServer)) {
+            $this->koalamonWebhookServer = $koalamonWebhookServer;
+        }
+
+        if (!is_null($koalamonInformationServer)) {
+            $this->koalamonInformationServer = $koalamonInformationServer;
         }
     }
 
@@ -58,26 +66,24 @@ class Reporter
      */
     public function send(Event $event, $debug = false)
     {
-        $this->send($event, $debug);
+        $this->sendEvent($event, $debug);
     }
 
     public function sendEvent(Event $event, $debug = false)
     {
+        $endpointWithApiKey = "?api_key=" . $this->apiKey;
+        $response = $this->getJsonResponse($this->koalamonWebhookServer . $endpointWithApiKey, $event);
+
         if ($debug) {
-            $endpoint = self::ENDPOINT_WEBHOOK_DEFAULT_DEBUG;
-        } else {
-            $endpoint = self::ENDPOINT_WEBHOOK_DEFAULT;
+            var_dump($response);
         }
 
-        $endpointWithApiKey = $endpoint . "?api_key=" . $this->apiKey;
-        $response = $this->getJsonResponse($endpointWithApiKey, $event);
-
         if ($response->status != self::RESPONSE_STATUS_SUCCESS) {
-            throw new ServerException("Failed sending event (" . $response->message . ").", $response);
+            throw new \RuntimeException("Failed sending event with message '" . $response->message . "'");
         }
     }
 
-    public function sendInformation(Information $information, $debug)
+    public function sendInformation(Information $information, $debug = false)
     {
         if ($debug) {
             $endpoint = self::ENDPOINT_INFORMATION_DEFAULT_DEBUG;
@@ -85,7 +91,7 @@ class Reporter
             $endpoint = self::ENDPOINT_INFORMATION_DEFAULT;
         }
 
-        $endpointWithApiKey = $endpoint . "?api_key=" . $this->apiKey;
+        $endpointWithApiKey = $this->koalamonInformationServer . $endpoint . "?api_key=" . $this->apiKey;
         $response = $this->getJsonResponse($endpointWithApiKey, $information);
 
         if ($response->status != self::RESPONSE_STATUS_SUCCESS) {
@@ -114,7 +120,9 @@ class Reporter
         try {
             $response = $this->httpClient->request('POST', $endpoint, ['body' => $objectJson]);
         } catch (\Exception $e) {
-            throw $e;
+            $ex = new \Koalamon\Client\Reporter\ServerException($e->getMessage(), $e->getResponse());
+            $ex->setEndpoint($endpoint);
+            throw $ex;
         }
 
         $responseStatus = json_decode($response->getBody());
