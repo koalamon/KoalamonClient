@@ -78,8 +78,8 @@ class Reporter
             var_dump($response);
         }
 
-        if(is_null($response)) {
-            throw new \RuntimeException("Failed sending event to ".$this->koalamonWebhookServer . $endpointWithApiKey);
+        if (is_null($response)) {
+            throw new \RuntimeException("Failed sending event to " . $this->koalamonWebhookServer . $endpointWithApiKey);
         }
 
         if ($response->status != self::RESPONSE_STATUS_SUCCESS) {
@@ -119,13 +119,14 @@ class Reporter
      */
     private function getJsonResponse($endpoint, \JsonSerializable $object)
     {
-        $objectJson = json_encode($object);
+        $objectJson = json_encode($object->jsonSerialize());
 
         try {
             $response = $this->httpClient->request('POST', $endpoint, ['body' => $objectJson]);
         } catch (\Exception $e) {
-            $ex = new \Koalamon\Client\Reporter\ServerException($e->getMessage(), $e->getResponse());
-            $ex->setEndpoint($endpoint);
+            $ex = new KoalamonException('Error sending event to Koalamon server.');
+            $ex->setPayload($objectJson);
+            $ex->setUrl($endpoint);
             throw $ex;
         }
 
