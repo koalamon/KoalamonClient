@@ -113,7 +113,7 @@ class Client
                 }
 
             } else {
-                $element = $systemsElement;
+                $element = $systemsElement->system;
                 $options = '';
             }
 
@@ -122,12 +122,12 @@ class Client
             if (property_exists($element, 'subSystems')) {
                 foreach ($element->subSystems as $subSystem) {
                     $project = new Project($subSystem->project->name, $element->project->identifier, $subSystem->project->api_key);
-                    $subSystems[] = new System($subSystem->identifier, $subSystem->name, $subSystem->url, $project);
+                    $subSystems[] = new System($subSystem->id, $subSystem->identifier, $subSystem->name, $subSystem->url, $project);
                 }
             }
 
             $sysProject = new Project($element->project->name, $element->project->identifier, $element->project->api_key);
-            $systems[] = ['system' => new System($element->identifier, $element->name, $element->url, $sysProject, $subSystems), 'options' => $options];
+            $systems[] = ['system' => new System($element->id, $element->identifier, $element->name, $element->url, $sysProject, $subSystems), 'options' => $options];
         }
 
         return $systems;

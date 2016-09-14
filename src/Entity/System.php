@@ -4,6 +4,8 @@ namespace Koalamon\Client\Entity;
 
 class System
 {
+    private $id;
+
     private $identifier;
     private $name;
 
@@ -19,13 +21,22 @@ class System
      * @param $url
      * @param $project
      */
-    public function __construct($identifier, $name, $url, Project $project, $subSystems = array())
+    public function __construct($id, $identifier, $name, $url, Project $project, $subSystems = array())
     {
+        $this->id = $id;
         $this->identifier = $identifier;
         $this->name = $name;
         $this->url = $url;
         $this->project = $project;
         $this->subSystems = $subSystems;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getId()
+    {
+        return $this->id;
     }
 
     /**
