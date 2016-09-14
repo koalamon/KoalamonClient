@@ -74,10 +74,6 @@ class Reporter
         $endpointWithApiKey = "?api_key=" . $this->apiKey;
         $response = $this->getJsonResponse($this->koalamonWebhookServer . $endpointWithApiKey, $event);
 
-        if ($debug) {
-            var_dump($response);
-        }
-
         if (is_null($response)) {
             throw new \RuntimeException("Failed sending event to " . $this->koalamonWebhookServer . $endpointWithApiKey);
         }
