@@ -28,15 +28,21 @@ class Event implements \JsonSerializable
     /**
      * Initialize the event.
      *
-     * @param $identifier All events with this identifier will be grouped in koalamon.
-     * @param $system The system the events belongs to (e.g. www.example.com).
-     * @param success|failed $status Te status of the event. Use the const of this class.
+     * @param string $identifier All events with this identifier will be grouped in koalamon.
+     * @param string $system The system the events belongs to (e.g. www.example.com).
+     * @param "success"|"failed" $status Te status of the event. Use the const of this class.
      * @param string $tool The name of the tool that is using this library.
      * @param string $message The message that will be display in koalamon. Only mandatory if the
      *                        status is failure.
+     * @param integer value
+     * @param string url
      */
-    public function __construct($identifier, $system, $status, $tool = "", $message = "", $value = "", $url = "", $componentId = null)
+    public function __construct($identifier, $system, $status, $tool = "", $message = "", $value = null, $url = "", $componentId = null)
     {
+        if (is_string($value)) {
+            throw new \RuntimeException('Value must be integer or null.');
+        }
+
         $this->message = $message;
         $this->system = $system;
         $this->identifier = $identifier;
