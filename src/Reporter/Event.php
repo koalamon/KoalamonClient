@@ -39,6 +39,10 @@ class Event implements \JsonSerializable
      */
     public function __construct($identifier, $system, $status, $tool = "", $message = "", $value = null, $url = "", $componentId = null)
     {
+        if($value == "") {
+            $value = null;
+        }
+
         if (is_string($value)) {
             throw new \RuntimeException('Value must be integer or null.');
         }
