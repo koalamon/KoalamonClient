@@ -36,7 +36,7 @@ class Reporter
      * @param $project string The project name you want to report the event for.
      * @param $apiKey  string The api key can be found on the admin page of a project,
      *                 which can be seen if you are the project owner.
-     * @param null $httpClient
+     * @param Client|null $httpClient
      */
     public function __construct($project, $apiKey, Client $httpClient = null, $koalamonWebhookServer = null, $koalamonInformationServer = null)
     {
@@ -73,10 +73,6 @@ class Reporter
     {
         $endpointWithApiKey = "?api_key=" . $this->apiKey;
         $response = $this->getJsonResponse($this->koalamonWebhookServer . $endpointWithApiKey, $event);
-
-        if ($debug) {
-            var_dump($response);
-        }
 
         if (is_null($response)) {
             throw new \RuntimeException("Failed sending event to " . $this->koalamonWebhookServer . $endpointWithApiKey);

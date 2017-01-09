@@ -23,25 +23,37 @@ class Event implements \JsonSerializable
     private $tool;
     private $value;
     private $url;
+    private $componentId;
 
     /**
      * Initialize the event.
      *
-     * @param $identifier All events with this identifier will be grouped in koalamon.
-     * @param $system The system the events belongs to (e.g. www.example.com).
-     * @param success|failed $status Te status of the event. Use the const of this class.
+     * @param string $identifier All events with this identifier will be grouped in koalamon.
+     * @param string $system The system the events belongs to (e.g. www.example.com).
+     * @param "success"|"failed" $status Te status of the event. Use the const of this class.
      * @param string $tool The name of the tool that is using this library.
      * @param string $message The message that will be display in koalamon. Only mandatory if the
      *                        status is failure.
+     * @param integer value
+     * @param string url
      */
-    public function __construct($identifier, $system, $status, $tool = "", $message = "", $value = "", $url = "")
+    public function __construct($identifier, $system, $status, $tool = "", $message = "", $value = null, $url = "", $componentId = null)
     {
+        if($value == "") {
+            $value = null;
+        }
+
+        if (is_string($value)) {
+            throw new \RuntimeException('Value must be integer or null.');
+        }
+
         $this->message = $message;
         $this->system = $system;
         $this->identifier = $identifier;
         $this->tool = $tool;
         $this->value = $value;
         $this->url = $url;
+        $this->componentId = $componentId;
 
         if ($status == self::STATUS_FAILURE || $status == self::STATUS_SUCCESS) {
             $this->status = $status;
@@ -64,6 +76,7 @@ class Event implements \JsonSerializable
             "message" => $this->message,
             "type" => $this->tool,
             "value" => $this->value,
+            "componentId" => $this->componentId,
             "url" => $this->url);
     }
 }
