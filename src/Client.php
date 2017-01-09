@@ -126,8 +126,14 @@ class Client
                 }
             }
 
+            if (property_exists($element, 'login')) {
+                $login = json_encode($element->login);
+            } else {
+                $login = '';
+            }
+
             $sysProject = new Project($element->project->name, $element->project->identifier, $element->project->api_key);
-            $systems[] = ['system' => new System($element->id, $element->identifier, $element->name, $element->url, $sysProject, $subSystems), 'options' => $options];
+            $systems[] = ['system' => new System($element->id, $element->identifier, $element->name, $element->url, $sysProject, $subSystems, $login), 'options' => $options];
         }
 
         return $systems;

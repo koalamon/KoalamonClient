@@ -14,6 +14,8 @@ class System
 
     private $subSystems;
 
+    private $login;
+
     /**
      * System constructor.
      * @param $identifier
@@ -21,7 +23,7 @@ class System
      * @param $url
      * @param $project
      */
-    public function __construct($id, $identifier, $name, $url, Project $project, $subSystems = array())
+    public function __construct($id, $identifier, $name, $url, Project $project, $subSystems = array(), $login = null)
     {
         $this->id = $id;
         $this->identifier = $identifier;
@@ -29,6 +31,7 @@ class System
         $this->url = $url;
         $this->project = $project;
         $this->subSystems = $subSystems;
+        $this->login = $login;
     }
 
     /**
@@ -69,6 +72,11 @@ class System
     public function getProject()
     {
         return $this->project;
+    }
+
+    public function getLogin()
+    {
+        return $this->login;
     }
 
     /**
