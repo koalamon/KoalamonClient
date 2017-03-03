@@ -2,6 +2,8 @@
 
 namespace Koalamon\Client\Reporter;
 
+use Koalamon\Client\Reporter\Event\Attribute;
+
 /**
  * Class Event
  *
@@ -11,7 +13,7 @@ namespace Koalamon\Client\Reporter;
  * @package Koalamon\EventReporter
  * @author Nils Langner <nils.langner@koalamon.com>
  */
-class Event implements \JsonSerializable
+class Event
 {
     const STATUS_FAILURE = "failure";
     const STATUS_SUCCESS = "success";
@@ -24,6 +26,8 @@ class Event implements \JsonSerializable
     private $value;
     private $url;
     private $componentId;
+
+    private $attributes = [];
 
     /**
      * Initialize the event.
@@ -39,7 +43,7 @@ class Event implements \JsonSerializable
      */
     public function __construct($identifier, $system, $status, $tool = "", $message = "", $value = null, $url = "", $componentId = null)
     {
-        if($value == "") {
+        if ($value == "") {
             $value = null;
         }
 
@@ -63,20 +67,80 @@ class Event implements \JsonSerializable
         }
     }
 
-    /**
-     * Convert the event to an array.
-     *
-     * @return array
-     */
-    public function jsonSerialize()
+    public function addAttribute(Attribute $attribute)
     {
-        return array("identifier" => $this->identifier,
-            "system" => $this->system,
-            "status" => $this->status,
-            "message" => $this->message,
-            "type" => $this->tool,
-            "value" => $this->value,
-            "componentId" => $this->componentId,
-            "url" => $this->url);
+        $this->attributes[] = $attribute;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMessage()
+    {
+        return $this->message;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSystem()
+    {
+        return $this->system;
+    }
+
+    /**
+     * @return string
+     */
+    public function getIdentifier()
+    {
+        return $this->identifier;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getStatus()
+    {
+        return $this->status;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTool()
+    {
+        return $this->tool;
+    }
+
+    /**
+     * @return null
+     */
+    public function getValue()
+    {
+        return $this->value;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUrl()
+    {
+        return $this->url;
+    }
+
+    /**
+     * @return null
+     */
+    public function getComponentId()
+    {
+        return $this->componentId;
+    }
+
+    /**
+     * @return Attribute[]
+     */
+    public function getAttributes()
+    {
+        return $this->attributes;
     }
 }

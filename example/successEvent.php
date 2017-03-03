@@ -1,6 +1,6 @@
 <?php
 
-include_once __DIR__ . '/../.vendor/autoload.php';
+include_once __DIR__ . '/../vendor/autoload.php';
 
 $reporter = new \Koalamon\Client\Reporter\Reporter('<my api key>', '<my project name>');
 

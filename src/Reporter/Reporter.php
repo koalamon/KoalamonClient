@@ -4,6 +4,8 @@ namespace Koalamon\Client\Reporter;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ServerException;
+use Koalamon\Client\Reporter\Event\Processor\Processor;
+use Koalamon\Client\Reporter\Event\Processor\SimpleProcessor;
 
 /**
  * Class Reporter
@@ -22,6 +24,8 @@ class Reporter
      * @var HttpAdapterInterface
      */
     private $httpClient;
+
+    private $processor;
 
     private $koalamonWebhookServer = 'https://webhook.koalamon.com/';
     private $koalamonInformationServer = 'https://monitor.koalamon.com/';
@@ -56,6 +60,13 @@ class Reporter
         if (!is_null($koalamonInformationServer)) {
             $this->koalamonInformationServer = $koalamonInformationServer;
         }
+
+        $this->processor = new SimpleProcessor();
+    }
+
+    public function setEventProcessor(Processor $processor)
+    {
+        $this->processor = $processor;
     }
 
     /**
@@ -113,9 +124,11 @@ class Reporter
      *   status: "success"
      * }
      */
-    private function getJsonResponse($endpoint, \JsonSerializable $object)
+    private function getJsonResponse($endpoint, Event $event)
     {
-        $objectJson = json_encode($object->jsonSerialize());
+        $objectJson = json_encode($this->processor->process($event));
+
+        var_dump($objectJson);
 
         try {
             $response = $this->httpClient->request('POST', $endpoint, ['body' => $objectJson]);
