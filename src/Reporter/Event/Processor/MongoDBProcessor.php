@@ -12,7 +12,7 @@ class MongoDBProcessor implements Processor
 
     public function __construct($host, $databaseName, $publicHost)
     {
-        $this->collection = (new Client($host))->$databaseName->users;
+        $this->collection = (new Client($host))->$databaseName->storage;
         $this->publicHost = $publicHost;
     }
 
