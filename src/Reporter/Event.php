@@ -65,11 +65,10 @@ class Event
             throw new \InvalidArgumentException("The given status does not exist. Possible values are: "
                 . self::STATUS_SUCCESS . ", " . self::STATUS_FAILURE . ".");
         }
-    }
 
-    public function addAttribute(Attribute $attribute)
-    {
-        $this->attributes[] = $attribute;
+        if (array_key_exists('WORKER_IDENTIFER', $_ENV)) {
+            $this->addAttribute(new Attribute('_leankoala_worker', $_ENV['WORKER_IDENTIFER']));
+        }
     }
 
     /**
@@ -134,6 +133,11 @@ class Event
     public function getComponentId()
     {
         return $this->componentId;
+    }
+
+    public function addAttribute(Attribute $attribute)
+    {
+        $this->attributes[] = $attribute;
     }
 
     /**
