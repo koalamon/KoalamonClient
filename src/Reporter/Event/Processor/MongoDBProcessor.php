@@ -59,7 +59,7 @@ class MongoDBProcessor implements Processor
         if (array_key_exists('MONGO_HOST', $_ENV)) {
             $mongoHost = 'mongodb://' . $_ENV['MONGO_HOST'] . '/';
         } else {
-            $mongoHost = 'mongodb://127.0.0.1/';
+            $mongoHost = 'mongodb://mongodb/';
         }
 
         if (array_key_exists('MONGO_PUBLIC_HOST', $_ENV)) {
