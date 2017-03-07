@@ -22,7 +22,7 @@ class MongoDBProcessor implements Processor
 
         foreach ($event->getAttributes() as $attribute) {
             if ($attribute->isIsStorable()) {
-                $attributes[$attribute->getKey()] = $this->persistValue($attribute->getValue());
+                $attributes[$attribute->getKey()] = $this->persistValue($attribute->getKey(), $attribute->getValue(), $event);
             } else {
                 $attributes[$attribute->getKey()] = $attribute->getValue();
             }
@@ -39,10 +39,12 @@ class MongoDBProcessor implements Processor
             'attributes' => $attributes);
     }
 
-    private function persistValue($value)
+    private function persistValue($key, $value, Event $event)
     {
         $insertOneResult = $this->collection->insertOne([
+            'key' => $key,
             'value' => $value,
+            'tool' => $event->getTool(),
             'created' => time(),
         ]);
 

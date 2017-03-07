@@ -128,8 +128,6 @@ class Reporter
     {
         $objectJson = json_encode($this->processor->process($event));
 
-        var_dump($objectJson);
-
         try {
             $response = $this->httpClient->request('POST', $endpoint, ['body' => $objectJson]);
         } catch (\Exception $e) {
