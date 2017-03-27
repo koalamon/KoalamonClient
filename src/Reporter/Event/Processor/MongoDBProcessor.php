@@ -32,7 +32,7 @@ class MongoDBProcessor implements Processor
                         $attributes[$attribute->getKey()] = $this->persistValue($attribute->getValue());
                     }
                 } catch (\Exception $e) {
-                    $attributes[$attribute->getKey()] = '_error: ' . $e->getMessage();
+                    $attributes[$attribute->getKey()] = '_error: ' . json_encode($e->getMessage());
                 }
             } else {
                 $attributes[$attribute->getKey()] = $attribute->getValue();
