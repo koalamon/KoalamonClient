@@ -10,6 +10,8 @@ class MongoDBProcessor implements Processor
     private $collection;
     private $publicHost;
 
+    private $memory = [];
+
     public function __construct($host = 'mongodb://127.0.0.1/', $publicHost = 'http://localhost', $databaseName = "leankoala")
     {
         $this->collection = (new Client($host))->$databaseName->storage;
@@ -23,9 +25,15 @@ class MongoDBProcessor implements Processor
         foreach ($event->getAttributes() as $attribute) {
             if ($attribute->isIsStorable()) {
                 try {
-                    $attributes[$attribute->getKey()] = $this->persistValue($attribute->getKey(), $attribute->getValue(), $event);
+                    $storageString = $this->fromInMemory($attribute->getValue());
+                    if ($storageString) {
+                        $attributes[$attribute->getKey()] = $storageString;
+                    } else {
+                        $attributes[$attribute->getKey()] = $this->persistValue($attribute->getKey(), $attribute->getValue(), $event);
+                    }
+
                 } catch (\Exception $e) {
-                    $attributes[$attribute->getKey()] = '_error: ' . $e->getMessage();
+                    $attributes[$attribute->getKey()] = '_error: ' . json_encode($e->getMessage());
                 }
             } else {
                 $attributes[$attribute->getKey()] = $attribute->getValue();
@@ -43,6 +51,16 @@ class MongoDBProcessor implements Processor
             'attributes' => $attributes);
     }
 
+    private function fromInMemory($value)
+    {
+        $checksum = md5(serialize($value));
+        if (array_key_exists($checksum, $this->memory)) {
+            return $this->memory[$checksum];
+        } else {
+            return false;
+        }
+    }
+
     private function persistValue($key, $value, Event $event)
     {
         $insertOneResult = $this->collection->insertOne([
@@ -53,7 +71,12 @@ class MongoDBProcessor implements Processor
         ]);
 
         $id = $insertOneResult->getInsertedId();
-        return 'storage:' . $this->publicHost . '/storage/' . $id;
+
+        $storageString = 'storage:' . $this->publicHost . '/storage/' . $id;
+
+        $this->memory[md5(serialize($value))] = $storageString;
+
+        return $storageString;
     }
 
     static public function createByEnvironmentVars($databaseName)
