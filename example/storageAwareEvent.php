@@ -15,6 +15,8 @@ if (!array_key_exists('MONGO_HOST', $_ENV) || !array_key_exists('MONGO_PUBLIC_HO
     die('ENVIRONMENT VARS NOT SET!!!');
 }
 
+
+
 $mongoHost = 'mongodb://' . $_ENV['MONGO_HOST'] . '/';
 $mongoPublicHost = $_ENV['MONGO_PUBLIC_HOST'];
 

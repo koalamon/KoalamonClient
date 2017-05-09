@@ -10,7 +10,7 @@ class MongoDBProcessor implements Processor
     private $collection;
     private $publicHost;
 
-    public function __construct($host, $databaseName, $publicHost)
+    public function __construct($host = 'mongodb://127.0.0.1/', $publicHost = 'http://localhost', $databaseName = "leankoala")
     {
         $this->collection = (new Client($host))->$databaseName->storage;
         $this->publicHost = $publicHost;
@@ -22,7 +22,11 @@ class MongoDBProcessor implements Processor
 
         foreach ($event->getAttributes() as $attribute) {
             if ($attribute->isIsStorable()) {
-                $attributes[$attribute->getKey()] = $this->persistValue($attribute->getKey(), $attribute->getValue(), $event);
+                try {
+                    $attributes[$attribute->getKey()] = $this->persistValue($attribute->getKey(), $attribute->getValue(), $event);
+                } catch (\Exception $e) {
+                    $attributes[$attribute->getKey()] = '_error: ' . $e->getMessage();
+                }
             } else {
                 $attributes[$attribute->getKey()] = $attribute->getValue();
             }
@@ -50,5 +54,22 @@ class MongoDBProcessor implements Processor
 
         $id = $insertOneResult->getInsertedId();
         return 'storage:' . $this->publicHost . '/storage/' . $id;
+    }
+
+    static public function createByEnvironmentVars($databaseName)
+    {
+        if (array_key_exists('MONGO_HOST', $_ENV)) {
+            $mongoHost = 'mongodb://' . $_ENV['MONGO_HOST'] . '/';
+        } else {
+            $mongoHost = 'mongodb://mongodb/';
+        }
+
+        if (array_key_exists('MONGO_PUBLIC_HOST', $_ENV)) {
+            $mongoPublicHost = $_ENV['MONGO_PUBLIC_HOST'];
+        } else {
+            $mongoPublicHost = 'http://localhost';
+        }
+
+        return new self($mongoHost, $mongoPublicHost, $databaseName);
     }
 }
