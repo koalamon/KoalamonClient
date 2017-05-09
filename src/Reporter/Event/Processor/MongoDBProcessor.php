@@ -29,8 +29,9 @@ class MongoDBProcessor implements Processor
                     if ($storageString) {
                         $attributes[$attribute->getKey()] = $storageString;
                     } else {
-                        $attributes[$attribute->getKey()] = $this->persistValue($attribute->getValue());
+                        $attributes[$attribute->getKey()] = $this->persistValue($attribute->getKey(), $attribute->getValue(), $event);
                     }
+
                 } catch (\Exception $e) {
                     $attributes[$attribute->getKey()] = '_error: ' . json_encode($e->getMessage());
                 }
@@ -60,10 +61,12 @@ class MongoDBProcessor implements Processor
         }
     }
 
-    private function persistValue($value)
+    private function persistValue($key, $value, Event $event)
     {
         $insertOneResult = $this->collection->insertOne([
+            'key' => $key,
             'value' => $value,
+            'tool' => $event->getTool(),
             'created' => time(),
         ]);
 
