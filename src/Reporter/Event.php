@@ -43,7 +43,7 @@ class Event
      */
     public function __construct($identifier, $system, $status, $tool = "", $message = "", $value = null, $url = "", $componentId = null)
     {
-        if ($value == "") {
+        if ($value === "") {
             $value = null;
         }
 
