@@ -133,7 +133,13 @@ class Client
             }
 
             $sysProject = new Project($element->project->name, $element->project->identifier, $element->project->api_key);
-            $systems[] = ['system' => new System($element->id, $element->identifier, $element->name, $element->url, $sysProject, $subSystems, $login), 'options' => $options];
+            $queue = $element->project->queue;
+
+            $systems[] = [
+                'system' => new System($element->id, $element->identifier, $element->name, $element->url, $sysProject, $subSystems, $login),
+                'options' => $options,
+                'queue' => $queue
+            ];
         }
 
         return $systems;
