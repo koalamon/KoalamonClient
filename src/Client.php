@@ -122,7 +122,14 @@ class Client
             if (property_exists($element, 'subSystems')) {
                 foreach ($element->subSystems as $subSystem) {
                     $project = new Project($subSystem->project->name, $element->project->identifier, $subSystem->project->api_key);
-                    $subSystems[] = new System($subSystem->id, $subSystem->identifier, $subSystem->name, $subSystem->url, $project);
+                    $subSystems[] = new System(
+                        $subSystem->id,
+                        $subSystem->identifier,
+                        $subSystem->name,
+                        $subSystem->url,
+                        $project,
+                        $subSystem->speed
+                    );
                 }
             }
 
@@ -136,7 +143,16 @@ class Client
             $queue = $element->project->queue;
 
             $systems[] = [
-                'system' => new System($element->id, $element->identifier, $element->name, $element->url, $sysProject, $subSystems, $login),
+                'system' => new System(
+                    $element->id,
+                    $element->identifier,
+                    $element->name,
+                    $element->url,
+                    $sysProject,
+                    $element->speed,
+                    $subSystems,
+                    $login
+                ),
                 'options' => $options,
                 'queue' => $queue
             ];

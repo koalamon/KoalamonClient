@@ -16,6 +16,8 @@ class System
 
     private $login;
 
+    private $speed;
+
     /**
      * System constructor.
      * @param $identifier
@@ -23,7 +25,7 @@ class System
      * @param $url
      * @param $project
      */
-    public function __construct($id, $identifier, $name, $url, Project $project, $subSystems = array(), $login = null)
+    public function __construct($id, $identifier, $name, $url, Project $project, $speed, $subSystems = array(), $login = null)
     {
         $this->id = $id;
         $this->identifier = $identifier;
@@ -32,6 +34,7 @@ class System
         $this->project = $project;
         $this->subSystems = $subSystems;
         $this->login = $login;
+        $this->speed = $speed;
     }
 
     /**
@@ -43,7 +46,7 @@ class System
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getIdentifier()
     {
@@ -51,7 +54,7 @@ class System
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getName()
     {
@@ -85,5 +88,13 @@ class System
     public function getSubSystems()
     {
         return $this->subSystems;
+    }
+
+    /**
+     * @return integer
+     */
+    public function getSpeed()
+    {
+        return $this->speed;
     }
 }
