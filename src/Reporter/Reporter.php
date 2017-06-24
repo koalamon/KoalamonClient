@@ -128,13 +128,13 @@ class Reporter
     {
         $objectJson = json_encode($this->processor->process($event));
 
-        var_dump($objectJson);
         var_dump($endpoint);
+        var_dump($objectJson);
 
         try {
             $response = $this->httpClient->request('POST', $endpoint, ['body' => $objectJson]);
         } catch (\Exception $e) {
-            $ex = new KoalamonException('Error sending event to Koalamon server.');
+            $ex = new KoalamonException('Error sending event to Koalamon server. (' . $e->getMessage() . ')');
             $ex->setPayload($objectJson);
             $ex->setUrl($endpoint);
 
