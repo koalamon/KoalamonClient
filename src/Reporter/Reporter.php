@@ -137,10 +137,15 @@ class Reporter
             $ex = new KoalamonException('Error sending event to Koalamon server.');
             $ex->setPayload($objectJson);
             $ex->setUrl($endpoint);
+
             throw $ex;
         }
 
-        $responseStatus = json_decode($response->getBody());
+        // this is needed if the DebugConnector is active
+        $body = (string)$response->getBody();
+        $body = str_replace('DebugConnector::sendEvent', '', $body);
+
+        $responseStatus = json_decode($body);
 
         return $responseStatus;
     }
