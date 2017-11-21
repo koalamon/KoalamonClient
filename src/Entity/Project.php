@@ -7,12 +7,14 @@ class Project
     private $name;
     private $identifier;
     private $apiKey;
+    private $maxResponseTime;
 
-    public function __construct($name, $identifier, $apiKey)
+    public function __construct($name, $identifier, $apiKey, $maxResponseTime)
     {
         $this->name = $name;
         $this->identifier = $identifier;
         $this->apiKey = $apiKey;
+        $this->maxResponseTime = $maxResponseTime;
     }
 
     /**
@@ -37,5 +39,13 @@ class Project
     public function getApiKey()
     {
         return $this->apiKey;
+    }
+
+    /**
+     * @return integer
+     */
+    public function getMaxResponseTime()
+    {
+        return $this->maxResponseTime;
     }
 }

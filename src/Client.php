@@ -68,7 +68,7 @@ class Client
         $projects = array();
 
         foreach ($projectArray as $projectElement) {
-            $projects[] = new Project($projectElement->name, $projectElement->identifier, $projectElement->apiKey);
+            $projects[] = new Project($projectElement->name, $projectElement->identifier, $projectElement->apiKey, $projectElement->maxResponseTime);
         }
 
         return $projects;
@@ -121,7 +121,7 @@ class Client
 
             if (property_exists($element, 'subSystems')) {
                 foreach ($element->subSystems as $subSystem) {
-                    $project = new Project($subSystem->project->name, $element->project->identifier, $subSystem->project->api_key);
+                    $project = new Project($subSystem->project->name, $element->project->identifier, $subSystem->project->api_key, $subSystem->project->maxResponseTime);
                     $subSystems[] = new System(
                         $subSystem->id,
                         $subSystem->identifier,
@@ -139,7 +139,7 @@ class Client
                 $login = '';
             }
 
-            $sysProject = new Project($element->project->name, $element->project->identifier, $element->project->api_key);
+            $sysProject = new Project($element->project->name, $element->project->identifier, $element->project->api_key, $element->maxResponseTime);
             $queue = $element->project->queue;
 
             $systems[] = [
