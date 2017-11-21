@@ -139,7 +139,7 @@ class Client
                 $login = '';
             }
 
-            $sysProject = new Project($element->project->name, $element->project->identifier, $element->project->api_key, $element->maxResponseTime);
+            $sysProject = new Project($element->project->name, $element->project->identifier, $element->project->api_key, $element->project->maxResponseTime);
             $queue = $element->project->queue;
 
             $systems[] = [
