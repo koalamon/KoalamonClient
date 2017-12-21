@@ -80,7 +80,8 @@ class Client
      */
     public function getSystemsFromUrl($url, $withOptions = false)
     {
-        return $this->initSystems($this->getResult($url, false), $withOptions);
+        $result = $this->getResult($url, false);
+        return $this->initSystems($result, $withOptions);
     }
 
     public function getUrlsFromUrl($url)
