@@ -17,6 +17,7 @@ class Event
 {
     const STATUS_FAILURE = "failure";
     const STATUS_SUCCESS = "success";
+    const STATUS_SKIPPED = "skipped";
 
     private $message;
     private $system;
@@ -59,11 +60,11 @@ class Event
         $this->url = $url;
         $this->componentId = $componentId;
 
-        if ($status == self::STATUS_FAILURE || $status == self::STATUS_SUCCESS) {
+        if ($status == self::STATUS_FAILURE || $status == self::STATUS_SUCCESS || $status == self::STATUS_SKIPPED) {
             $this->status = $status;
         } else {
             throw new \InvalidArgumentException("The given status does not exist. Possible values are: "
-                . self::STATUS_SUCCESS . ", " . self::STATUS_FAILURE . ".");
+                . self::STATUS_SUCCESS . ", " . self::STATUS_FAILURE . ", " . self::STATUS_SKIPPED . ".");
         }
 
         if (array_key_exists('WORKER_IDENTIFER', $_ENV)) {
