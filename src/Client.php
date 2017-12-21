@@ -128,7 +128,8 @@ class Client
                         $subSystem->name,
                         $subSystem->url,
                         $project,
-                        $subSystem->speed
+                        $subSystem->speed,
+                        $subSystem->device
                     );
                 }
             }
@@ -151,7 +152,8 @@ class Client
                     $sysProject,
                     $element->speed,
                     $subSystems,
-                    $login
+                    $login,
+                    $element->device
                 ),
                 'options' => $options,
                 'queue' => $queue
