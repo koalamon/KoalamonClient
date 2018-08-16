@@ -4,6 +4,7 @@ namespace Koalamon\Client\Reporter;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ServerException;
+use Koalamon\Client\Reporter\Event\Attribute;
 use Koalamon\Client\Reporter\Event\Processor\Processor;
 use Koalamon\Client\Reporter\Event\Processor\SimpleProcessor;
 
@@ -129,7 +130,7 @@ class Reporter
         $objectJson = json_encode($this->processor->process($event));
 
         var_dump($endpoint);
-        var_dump($objectJson);
+        print_r($objectJson);
 
         try {
             $response = $this->httpClient->request('POST', $endpoint, ['body' => $objectJson]);
@@ -148,5 +149,41 @@ class Reporter
         $responseStatus = json_decode($body);
 
         return $responseStatus;
+    }
+
+    /**
+     * @param $projectId
+     * @param Failure[] $failures
+     */
+    public function sendFailures($failures)
+    {
+        foreach ($failures as $failure) {
+            $this->sendFailure($failure);
+        }
+    }
+
+    public function sendFailure(Failure $failure)
+    {
+        $event = new Event(
+            'worker_failure',
+            '__system__koala____WORKER__',
+            Event::STATUS_SUCCESS, '',
+            '',
+            null
+        );
+
+        if ($failure->getSystemId()) {
+            $event->addAttribute(new Attribute('componentId', $failure->getSystemId()));
+        }
+
+        $event->addAttribute(new Attribute('_leankoala_worker', 'unknown'));
+        $event->addAttribute(new Attribute('message', $failure->getMessage()));
+        $event->addAttribute(new Attribute('type', $failure->getType()));
+        $event->addAttribute(new Attribute('tool', $failure->getTool()));
+        $event->addAttribute(new Attribute('command', $failure->getCommand()));
+
+        // var_dump($event);
+
+        $this->send($event);
     }
 }

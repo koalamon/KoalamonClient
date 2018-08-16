@@ -1,13 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: nils.langner
- * Date: 29.06.16
- * Time: 14:44
- */
 
 namespace Koalamon\Client\Reporter;
-
 
 class KoalamonException extends \Exception
 {
