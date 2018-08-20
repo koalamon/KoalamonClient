@@ -7,6 +7,7 @@ use GuzzleHttp\Exception\ServerException;
 use Koalamon\Client\Reporter\Event\Attribute;
 use Koalamon\Client\Reporter\Event\Processor\Processor;
 use Koalamon\Client\Reporter\Event\Processor\SimpleProcessor;
+use phm\HttpWebdriverClient\Http\Client\HttpClient;
 
 /**
  * Class Reporter
@@ -22,7 +23,7 @@ class Reporter
     private $project;
 
     /**
-     * @var HttpAdapterInterface
+     * @var HttpClient
      */
     private $httpClient;
 
@@ -81,6 +82,11 @@ class Reporter
         $this->sendEvent($event, $debug);
     }
 
+    /**
+     * @param Event $event
+     * @param bool $debug
+     * @throws KoalamonException
+     */
     public function sendEvent(Event $event, $debug = false)
     {
         $endpointWithApiKey = "?api_key=" . $this->apiKey;
@@ -95,6 +101,11 @@ class Reporter
         }
     }
 
+    /**
+     * @param Information $information
+     * @param bool $debug
+     * @throws KoalamonException
+     */
     public function sendInformation(Information $information, $debug = false)
     {
         if ($debug) {
@@ -176,7 +187,6 @@ class Reporter
             $event->addAttribute(new Attribute('componentId', $failure->getSystemId()));
         }
 
-        $event->addAttribute(new Attribute('_leankoala_worker', 'unknown'));
         $event->addAttribute(new Attribute('message', $failure->getMessage()));
         $event->addAttribute(new Attribute('type', $failure->getType()));
         $event->addAttribute(new Attribute('tool', $failure->getTool()));

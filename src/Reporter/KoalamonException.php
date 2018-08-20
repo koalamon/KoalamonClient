@@ -32,6 +32,4 @@ class KoalamonException extends \Exception
     {
         return $this->url;
     }
-
-
 }
