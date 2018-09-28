@@ -154,7 +154,8 @@ class Client
                     $element->speed,
                     $subSystems,
                     $login,
-                    $element->device
+                    $element->device,
+                    $element->headers
                 ),
                 'options' => $options,
                 'queue' => $queue

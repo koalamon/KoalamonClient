@@ -16,6 +16,8 @@ class System
 
     private $login;
 
+    private $headers;
+
     private $speed;
 
     private $device;
@@ -27,7 +29,7 @@ class System
      * @param $url
      * @param $project
      */
-    public function __construct($id, $identifier, $name, $url, Project $project, $speed, $subSystems = array(), $login = null, $device = null)
+    public function __construct($id, $identifier, $name, $url, Project $project, $speed, $subSystems = array(), $login = null, $device = null, $headers = null)
     {
         $this->id = $id;
         $this->identifier = $identifier;
@@ -38,6 +40,7 @@ class System
         $this->login = $login;
         $this->speed = $speed;
         $this->device = $device;
+        $this->headers = $headers;
     }
 
     /**
@@ -107,5 +110,13 @@ class System
     public function getDevice()
     {
         return $this->device;
+    }
+
+    /**
+     * @return null
+     */
+    public function getHeaders()
+    {
+        return $this->headers;
     }
 }
