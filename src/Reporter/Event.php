@@ -67,8 +67,10 @@ class Event
                 . self::STATUS_SUCCESS . ", " . self::STATUS_FAILURE . ", " . self::STATUS_SKIPPED . ".");
         }
 
-        if (array_key_exists('WORKER_IDENTIFER', $_ENV)) {
-            $this->addAttribute(new Attribute('_leankoala_worker', $_ENV['WORKER_IDENTIFER']));
+        if (array_key_exists('WORKER_IDENTIFIER', $_ENV)) {
+            $this->addAttribute(new Attribute('_leankoala_worker', $_ENV['WORKER_IDENTIFIER']));
+        }else{
+            $this->addAttribute(new Attribute('_leankoala_worker', ''));
         }
     }
 
