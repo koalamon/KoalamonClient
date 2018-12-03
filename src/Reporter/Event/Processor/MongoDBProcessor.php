@@ -81,18 +81,23 @@ class MongoDBProcessor implements Processor
 
     static public function createByEnvironmentVars($databaseName)
     {
-        if (array_key_exists('MONGO_HOST', $_ENV)) {
-            $mongoHost = 'mongodb://' . $_ENV['MONGO_HOST'] . '/';
+        if (class_exists('\MongoDB\Driver\Manager')) {
+            if (array_key_exists('MONGO_HOST', $_ENV)) {
+                $mongoHost = 'mongodb://' . $_ENV['MONGO_HOST'] . '/';
+            } else {
+                $mongoHost = 'mongodb://mongodb/';
+            }
+
+            if (array_key_exists('MONGO_PUBLIC_HOST', $_ENV)) {
+                $mongoPublicHost = $_ENV['MONGO_PUBLIC_HOST'];
+            } else {
+                $mongoPublicHost = 'http://localhost';
+            }
+            return new self($mongoHost, $mongoPublicHost, $databaseName);
         } else {
-            $mongoHost = 'mongodb://mongodb/';
+            echo "\nUnable to use MongoDBProcessor, using null processor instead.\n";
+            return new NullProcessor();
         }
 
-        if (array_key_exists('MONGO_PUBLIC_HOST', $_ENV)) {
-            $mongoPublicHost = $_ENV['MONGO_PUBLIC_HOST'];
-        } else {
-            $mongoPublicHost = 'http://localhost';
-        }
-
-        return new self($mongoHost, $mongoPublicHost, $databaseName);
     }
 }
