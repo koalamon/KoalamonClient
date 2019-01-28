@@ -83,7 +83,11 @@ class MongoDBProcessor implements Processor
     {
         if (class_exists('\MongoDB\Driver\Manager')) {
             if (array_key_exists('MONGO_HOST', $_ENV)) {
-                $mongoHost = 'mongodb://' . $_ENV['MONGO_HOST'] . '/';
+
+                $username = $_ENV['MONGO_HOST_USER'];
+                $password = $_ENV['MONGO_HOST_PASSWORD'];
+
+                $mongoHost = 'mongodb://' . $username . ':' . $password . '@' . $_ENV['MONGO_HOST'] . '/';
             } else {
                 $mongoHost = 'mongodb://mongodb/';
             }
@@ -94,6 +98,7 @@ class MongoDBProcessor implements Processor
                 $mongoPublicHost = 'http://localhost';
             }
             return new self($mongoHost, $mongoPublicHost, $databaseName);
+
         } else {
             echo "\nUnable to use MongoDBProcessor, using null processor instead.\n";
             return new NullProcessor();
