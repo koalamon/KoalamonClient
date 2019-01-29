@@ -67,7 +67,9 @@ class FileProcessor implements Processor
 
         $dir = $this->baseDir . '/' . substr($hash, 0, 2) . '/' . substr($hash, 3, 2) . '/';
 
-        mkdir($dir, 0777, true);
+        if (!file_exists($dir)) {
+            mkdir($dir, 0777, true);
+        }
 
         file_put_contents($dir . $hash . '.json', base64_encode(json_encode($value)));
 
