@@ -2,7 +2,7 @@
 
 include_once __DIR__ . '/../vendor/autoload.php';
 
-$reporter = new \Koalamon\Client\Reporter\Reporter('<my api key>', '<my project name>');
+$reporter = new \Koalamon\Client\Reporter\WebhookReporter('<my api key>', '<my project name>');
 
 $event = new \Koalamon\Client\Reporter\Event('test_tool_www_example_com',
     'www_example_com',
