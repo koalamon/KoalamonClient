@@ -10,15 +10,12 @@ use Koalamon\Client\Reporter\Event\Processor\SimpleProcessor;
  *
  * This class can be used to report an event to the leankoala redis queue.
  *
- * @package Koalamon\EventReporter
- * @author Nils Langner <nils.langner@koalamon.com>
+ * @package Koalamon\Client\Reporter
+ * @author Nils Langner <nils.langner@leankoala.com>
  */
 class QueueReporter implements Reporter
 {
-    const IDENTIFIER = 'QueueReporter';
-
     const QUEUE_EVENT = 'event';
-    const QUEUE_METRIC = 'metric';
 
     private $apiKey;
 
@@ -49,6 +46,9 @@ class QueueReporter implements Reporter
         $this->processor = new SimpleProcessor();
     }
 
+    /**
+     * @param Processor $processor
+     */
     public function setEventProcessor(Processor $processor)
     {
         $this->processor = $processor;
@@ -66,6 +66,8 @@ class QueueReporter implements Reporter
     }
 
     /**
+     * Add an event to the redis event queue
+     *
      * @param Event $event
      * @param string $queue
      * @param bool $debug
@@ -78,10 +80,10 @@ class QueueReporter implements Reporter
             'date' => date('Y-m-d H:i:s')
         ];
 
-        $eventQueueName = $queue . '_' . $this->apiKey;
+        $eventQueueName = $queue . '_' . md5($this->apiKey);
 
-        if ($this->redis->lLen($eventQueueName) === 0) {
-            $this->redis->lPush($queue, $this->apiKey);
+        if ($this->redis->lLen($eventQueueName) === 0 || $this->redis->lLen($queue) === 0) {
+            $this->redis->lPush($queue, $eventQueueName);
         }
 
         $this->redis->lPush($eventQueueName, json_encode($data));
