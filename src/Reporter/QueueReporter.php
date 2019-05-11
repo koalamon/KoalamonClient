@@ -28,19 +28,23 @@ class QueueReporter implements Reporter
 
     private $redisHost;
 
+    private $queue;
+
     /**
      * @param $apiKey  string The api key can be found on the admin page of a project,
      *                 which can be seen if you are the project owner.
      * @param string $redisServer
      * @param string $redisPassword
      */
-    public function __construct($apiKey, $redisServer, $redisPassword)
+    public function __construct($apiKey, $woodstockServer, $woodstockPassword, $woodstockQueue = 'event')
     {
         $this->redis = new \Redis();
-        $this->redis->connect($redisServer);
-        $this->redis->auth($redisPassword);
+        $this->redis->connect($woodstockServer);
+        $this->redis->auth($woodstockPassword);
 
-        $this->redisHost = $redisServer;
+        $this->redisHost = $woodstockServer;
+
+        $this->queue = $woodstockQueue;
 
         $this->apiKey = $apiKey;
         $this->processor = new SimpleProcessor();
@@ -72,7 +76,7 @@ class QueueReporter implements Reporter
      * @param string $queue
      * @param bool $debug
      */
-    public function sendEvent(Event $event, $queue = self::QUEUE_EVENT, $debug = true)
+    public function sendEvent(Event $event, $debug = true)
     {
         $data = [
             'event' => $this->processor->process($event),
@@ -80,16 +84,16 @@ class QueueReporter implements Reporter
             'date' => date('Y-m-d H:i:s')
         ];
 
-        $eventQueueName = $queue . '_' . md5($this->apiKey);
+        $eventQueueName = $this->queue . '_' . md5($this->apiKey);
 
-        if ($this->redis->lLen($eventQueueName) === 0 || $this->redis->lLen($queue) === 0) {
-            $this->redis->lPush($queue, $eventQueueName);
+        if ($this->redis->lLen($eventQueueName) === 0 || $this->redis->lLen($this->queue) === 0) {
+            $this->redis->lPush($this->queue, $eventQueueName);
         }
 
         $this->redis->lPush($eventQueueName, json_encode($data));
 
         if ($debug) {
-            var_dump($this->redisHost);
+            var_dump($this->redisHost . '/' . $this->queue);
             var_dump(json_encode($data));
         }
     }
