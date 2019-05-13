@@ -84,6 +84,7 @@ class QueueReporter implements Reporter
             'date' => date('Y-m-d H:i:s')
         ];
 
+        /*
         $eventQueueName = $this->queue . '_' . md5($this->apiKey);
 
         if ($this->redis->lLen($eventQueueName) === 0 || $this->redis->lLen($this->queue) === 0) {
@@ -91,6 +92,9 @@ class QueueReporter implements Reporter
         }
 
         $this->redis->lPush($eventQueueName, json_encode($data));
+        */
+
+        $this->redis->lPush($this->queue, json_encode($data));
 
         if ($debug) {
             var_dump($this->redisHost . '/' . $this->queue);
