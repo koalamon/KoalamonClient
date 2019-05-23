@@ -2,6 +2,7 @@
 
 namespace Koalamon\Client\Reporter;
 
+use Koalamon\Client\Reporter\Event\Attribute;
 use Koalamon\Client\Reporter\Event\Processor\Processor;
 use Koalamon\Client\Reporter\Event\Processor\SimpleProcessor;
 
@@ -84,21 +85,46 @@ class QueueReporter implements Reporter
             'date' => date('Y-m-d H:i:s')
         ];
 
-        /*
-        $eventQueueName = $this->queue . '_' . md5($this->apiKey);
-
-        if ($this->redis->lLen($eventQueueName) === 0 || $this->redis->lLen($this->queue) === 0) {
-            $this->redis->lPush($this->queue, $eventQueueName);
-        }
-
-        $this->redis->lPush($eventQueueName, json_encode($data));
-        */
-
         $this->redis->lPush($this->queue, json_encode($data));
 
         if ($debug) {
             var_dump($this->redisHost . '/' . $this->queue);
             var_dump(json_encode($data));
         }
+    }
+
+    /**
+     * @param $projectId
+     * @param Failure[] $failures
+     */
+    public function sendFailures($failures)
+    {
+        foreach ($failures as $failure) {
+            $this->sendFailure($failure);
+        }
+    }
+
+    public function sendFailure(Failure $failure)
+    {
+        $event = new Event(
+            'worker_failure',
+            '__system__koala____WORKER__',
+            Event::STATUS_SUCCESS, '',
+            '',
+            null
+        );
+
+        if ($failure->getSystemId()) {
+            $event->addAttribute(new Attribute('componentId', $failure->getSystemId()));
+        }
+
+        $event->addAttribute(new Attribute('message', $failure->getMessage()));
+        $event->addAttribute(new Attribute('type', $failure->getType()));
+        $event->addAttribute(new Attribute('tool', $failure->getTool()));
+        $event->addAttribute(new Attribute('command', $failure->getCommand()));
+
+        // var_dump($event);
+
+        $this->send($event);
     }
 }
