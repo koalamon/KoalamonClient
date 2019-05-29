@@ -39,9 +39,11 @@ class QueueReporter implements Reporter
      */
     public function __construct($apiKey, $woodstockServer, $woodstockPassword, $woodstockQueue = 'event')
     {
-        $this->redis = new \Redis();
-        $this->redis->connect($woodstockServer);
-        $this->redis->auth($woodstockPassword);
+        if (class_exists("\Redis")) {
+            $this->redis = new \Redis();
+            $this->redis->connect($woodstockServer);
+            $this->redis->auth($woodstockPassword);
+        }
 
         $this->redisHost = $woodstockServer;
 
@@ -85,7 +87,11 @@ class QueueReporter implements Reporter
             'date' => date('Y-m-d H:i:s')
         ];
 
-        $this->redis->lPush($this->queue, json_encode($data));
+        if ($this->redis) {
+            $this->redis->lPush($this->queue, json_encode($data));
+        } else {
+            throw new \RuntimeException('Redis not initialized. Tried to send: ' . json_encode($data));
+        }
 
         if ($debug) {
             var_dump($this->redisHost . '/' . $this->queue);
