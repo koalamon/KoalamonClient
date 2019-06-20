@@ -31,13 +31,15 @@ class QueueReporter implements Reporter
 
     private $queue;
 
+    private $projectIdentifier;
+
     /**
      * @param $apiKey  string The api key can be found on the admin page of a project,
      *                 which can be seen if you are the project owner.
      * @param string $redisServer
      * @param string $redisPassword
      */
-    public function __construct($apiKey, $woodstockServer, $woodstockPassword, $woodstockQueue = 'event')
+    public function __construct($apiKey, $projectIdentifier, $woodstockServer, $woodstockPassword, $woodstockQueue = 'event')
     {
         $this->redis = new \Redis();
         $this->redis->connect($woodstockServer);
@@ -46,6 +48,8 @@ class QueueReporter implements Reporter
         $this->redisHost = $woodstockServer;
 
         $this->queue = $woodstockQueue;
+
+        $this->projectIdentifier = $projectIdentifier;
 
         $this->apiKey = $apiKey;
         $this->processor = new SimpleProcessor();
@@ -79,8 +83,12 @@ class QueueReporter implements Reporter
      */
     public function sendEvent(Event $event, $debug = true)
     {
+        $eventArray = $this->processor->process($event);
+
+        $eventArray['projectIdentifier'] = $this->projectIdentifier;
+
         $data = [
-            'event' => $this->processor->process($event),
+            'event' => $eventArray,
             'apiKey' => $this->apiKey,
             'date' => date('Y-m-d H:i:s')
         ];
