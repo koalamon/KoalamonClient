@@ -20,7 +20,7 @@ class FileProcessor implements Processor
 
     public function process(Event $event)
     {
-        $attributes = array();
+        $attributes = [];
 
         foreach ($event->getAttributes() as $attribute) {
             if ($attribute->isIsStorable()) {
@@ -40,7 +40,8 @@ class FileProcessor implements Processor
             }
         }
 
-        return array("identifier" => $event->getIdentifier(),
+        return [
+            "identifier" => $event->getIdentifier(),
             "system" => $event->getSystem(),
             "status" => $event->getStatus(),
             "message" => $event->getMessage(),
@@ -48,7 +49,8 @@ class FileProcessor implements Processor
             "value" => $event->getValue(),
             "componentId" => $event->getComponentId(),
             "url" => $event->getUrl(),
-            'attributes' => $attributes);
+            'attributes' => $attributes
+        ];
     }
 
     private function fromInMemory($value)
@@ -68,6 +70,7 @@ class FileProcessor implements Processor
         $dir = $this->baseDir . '/' . substr($hash, 0, 2) . '/' . substr($hash, 3, 2) . '/';
 
         if (!file_exists($dir)) {
+            echo "Creating directory: " . $dir;
             mkdir($dir, 0777, true);
         }
 
