@@ -76,7 +76,7 @@ class FileProcessor implements Processor
         $date = date('m0d0H', strtotime('+ ' . $timeToLiveInDays . ' days'));
         $hash = $date . md5(json_encode($value));
 
-        $dir = self::getFilenameFromHash($this->baseDir, $hash);
+        $dir = self::getDirectoryFromHash($this->baseDir, $hash);
 
         if (!file_exists($dir)) {
             echo "Creating directory: " . $dir;
@@ -106,7 +106,7 @@ class FileProcessor implements Processor
      *
      * @return string
      */
-    public static function getFilenameFromHash($baseDir, $hash, $version = 2)
+    public static function getDirectoryFromHash($baseDir, $hash, $version = 2)
     {
         switch ($version) {
             case 1:
