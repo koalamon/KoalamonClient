@@ -29,7 +29,12 @@ class FileProcessor implements Processor
                     if ($storageString) {
                         $attributes[$attribute->getKey()] = $storageString;
                     } else {
-                        $attributes[$attribute->getKey()] = $this->persistValue($attribute->getKey(), $attribute->getValue(), $event);
+                        $attributes[$attribute->getKey()] = $this->persistValue(
+                            $attribute->getKey(),
+                            $attribute->getValue(),
+                            $attribute->getTimeToLiveInDays(),
+                            $event
+                        );
                     }
 
                 } catch (\Exception $e) {
@@ -63,15 +68,21 @@ class FileProcessor implements Processor
         }
     }
 
-    private function persistValue($key, $value, Event $event)
+    private function persistValue($key, $value, $timeToLiveInDays, Event $event)
     {
-        $hash = md5(json_encode($value));
+        $date = date('m0d', strtotime('+ ' . $timeToLiveInDays . ' days'));
+        $hash = $date . md5(json_encode($value));
 
         $dir = $this->baseDir . '/' . substr($hash, 0, 2) . '/' . substr($hash, 3, 2) . '/';
 
         if (!file_exists($dir)) {
             echo "Creating directory: " . $dir;
-            mkdir($dir, 0777, true);
+            @mkdir($dir, 0777, true);
+
+            if (!file_exists($dir)) {
+                echo "\nWARNING: Unable to create " . $dir . ". Attributes are not stored.\n";
+                return;
+            }
         }
 
         file_put_contents($dir . $hash . '.json', base64_encode(json_encode($value)));
