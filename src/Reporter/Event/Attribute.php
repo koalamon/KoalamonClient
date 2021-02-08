@@ -43,6 +43,14 @@ class Attribute
     }
 
     /**
+     * @param int $timeToLiveInDays
+     */
+    public function setTimeToLiveInDays($timeToLiveInDays): void
+    {
+        $this->timeToLiveInDays = $timeToLiveInDays;
+    }
+
+    /**
      * @return int
      */
     public function getTimeToLiveInDays(): int
