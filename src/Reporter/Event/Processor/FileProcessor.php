@@ -6,6 +6,8 @@ use Koalamon\Client\Reporter\Event;
 
 class FileProcessor implements Processor
 {
+    const DEFAULT_STORAGE_URL_LENGTH = 91;
+
     private $baseDir;
 
     private $publicHost;
@@ -26,7 +28,7 @@ class FileProcessor implements Processor
         $attributes = [];
 
         foreach ($event->getAttributes() as $attribute) {
-            if ($attribute->isIsStorable()) {
+            if ($attribute->isIsStorable() && $this->isStorageRational($attribute->getValue())) {
                 try {
                     $storageString = $this->fromInMemory($attribute->getValue());
                     if ($storageString) {
@@ -61,6 +63,16 @@ class FileProcessor implements Processor
         ];
     }
 
+    private function isStorageRational($value)
+    {
+        return strlen($this->prepareDataForStorage($value)) > self::DEFAULT_STORAGE_URL_LENGTH;
+    }
+
+    private function prepareDataForStorage($value)
+    {
+        return base64_encode(json_encode($value));
+    }
+
     private function fromInMemory($value)
     {
         $checksum = md5(serialize($value));
@@ -83,12 +95,12 @@ class FileProcessor implements Processor
             @mkdir($dir, 0777, true);
 
             if (!file_exists($dir)) {
-                echo "\nWARNING: Unable to create " . $dir . ". Attributes (hash: " . $hash . ") are not stored.\n";
+                echo "\nWARNING: Unable to create " . $dir . ". Attributes (key: ".$key.", hash: " . $hash . ") are not stored.\n";
                 return;
             }
         }
 
-        file_put_contents($dir . $hash . '.json', base64_encode(json_encode($value)));
+        file_put_contents($dir . $hash . '.json', $this->prepareDataForStorage($value));
 
         $storageString = 'storage:' . $this->publicHost . '/storage/' . $hash;
 
