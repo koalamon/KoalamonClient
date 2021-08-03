@@ -3,7 +3,7 @@
   "description": "This library can be used to send events to the koalamon webhook",
   "require": {
     "php": ">= 5.4.0",
-    "guzzlehttp/guzzle": "~6.3.0"
+    "guzzlehttp/guzzle": "~7.3.0"
   },
   "suggest": {
     "mongodb/mongodb": "If you want to store data in a mongoDB"
