@@ -6,6 +6,8 @@ use Koalamon\Client\Reporter\Event;
 
 class FileProcessor implements Processor
 {
+    const DEFAULT_STORAGE_URL_LENGTH = 91;
+
     private $baseDir;
 
     private $publicHost;
@@ -18,18 +20,26 @@ class FileProcessor implements Processor
         $this->publicHost = $publicHost;
     }
 
+    /*
+     * @todo the attributes could be stores within ONE json document and not many
+     */
     public function process(Event $event)
     {
         $attributes = [];
 
         foreach ($event->getAttributes() as $attribute) {
-            if ($attribute->isIsStorable()) {
+            if ($attribute->isIsStorable() && $this->isStorageRational($attribute->getValue())) {
                 try {
                     $storageString = $this->fromInMemory($attribute->getValue());
                     if ($storageString) {
                         $attributes[$attribute->getKey()] = $storageString;
                     } else {
-                        $attributes[$attribute->getKey()] = $this->persistValue($attribute->getKey(), $attribute->getValue(), $event);
+                        $attributes[$attribute->getKey()] = $this->persistValue(
+                            $attribute->getKey(),
+                            $attribute->getValue(),
+                            $attribute->getTimeToLiveInDays(),
+                            $event
+                        );
                     }
 
                 } catch (\Exception $e) {
@@ -53,6 +63,16 @@ class FileProcessor implements Processor
         ];
     }
 
+    private function isStorageRational($value)
+    {
+        return strlen($this->prepareDataForStorage($value)) > self::DEFAULT_STORAGE_URL_LENGTH;
+    }
+
+    private function prepareDataForStorage($value)
+    {
+        return base64_encode(json_encode($value));
+    }
+
     private function fromInMemory($value)
     {
         $checksum = md5(serialize($value));
@@ -63,24 +83,50 @@ class FileProcessor implements Processor
         }
     }
 
-    private function persistValue($key, $value, Event $event)
+    private function persistValue($key, $value, $timeToLiveInDays, Event $event)
     {
-        $hash = md5(json_encode($value));
+        $date = date('m0d0H', strtotime('+ ' . $timeToLiveInDays . ' days'));
+        $hash = $date . md5(json_encode($value));
 
-        $dir = $this->baseDir . '/' . substr($hash, 0, 2) . '/' . substr($hash, 3, 2) . '/';
+        $dir = self::getDirectoryFromHash($this->baseDir, $hash);
 
         if (!file_exists($dir)) {
             echo "Creating directory: " . $dir;
-            mkdir($dir, 0777, true);
+            @mkdir($dir, 0777, true);
+
+            if (!file_exists($dir)) {
+                echo "\nWARNING: Unable to create " . $dir . ". Attributes (key: ".$key.", hash: " . $hash . ") are not stored.\n";
+                return;
+            }
         }
 
-        file_put_contents($dir . $hash . '.json', base64_encode(json_encode($value)));
+        file_put_contents($dir . $hash . '.json', $this->prepareDataForStorage($value));
 
         $storageString = 'storage:' . $this->publicHost . '/storage/' . $hash;
 
         $this->memory[md5(serialize($value))] = $storageString;
 
         return $storageString;
+    }
+
+    /**
+     * Create a filename for the given hash.
+     *
+     * @param string $baseDir
+     * @param string $hash
+     * @param int $version
+     *
+     * @return string
+     */
+    public static function getDirectoryFromHash($baseDir, $hash, $version = 2)
+    {
+        switch ($version) {
+            case 1:
+                return $baseDir . '/' . substr($hash, 0, 2) . '/' . substr($hash, 3, 2) . '/';
+            case 2:
+                return $baseDir . '/' . substr($hash, 0, 2) . '/' . substr($hash, 3, 2) . '/' . substr($hash, 6, 2) . '/';
+        }
+
     }
 
     static public function createByEnvironmentVars($baseDirectory)

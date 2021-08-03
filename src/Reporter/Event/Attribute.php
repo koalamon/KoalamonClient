@@ -8,11 +8,14 @@ class Attribute
     private $value;
     private $isStorable;
 
-    public function __construct($key, $value, $isStorable = false)
+    private $timeToLiveInDays;
+
+    public function __construct($key, $value, $isStorable = false, $timeToLiveInDays = 30)
     {
         $this->key = $key;
         $this->value = $value;
         $this->isStorable = $isStorable;
+        $this->timeToLiveInDays = $timeToLiveInDays;
     }
 
     /**
@@ -37,5 +40,21 @@ class Attribute
     public function isIsStorable()
     {
         return $this->isStorable;
+    }
+
+    /**
+     * @param int $timeToLiveInDays
+     */
+    public function setTimeToLiveInDays($timeToLiveInDays): void
+    {
+        $this->timeToLiveInDays = $timeToLiveInDays;
+    }
+
+    /**
+     * @return int
+     */
+    public function getTimeToLiveInDays(): int
+    {
+        return $this->timeToLiveInDays;
     }
 }
